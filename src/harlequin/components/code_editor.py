@@ -12,10 +12,14 @@ from textual.geometry import Offset
 from textual.message import Message
 from textual.reactive import reactive
 from textual.timer import Timer
-from textual.widgets import Tab, Tabs, TextArea
+from textual.widgets import Label, Tab, Tabs, TextArea
 from textual.widgets.text_area import EditHistory, Location, Selection
 from textual.worker import Worker, WorkerState
 from textual_textarea import TextAreaSaved, TextEditor
+from textual_textarea.autocomplete import CompletionList
+from textual_textarea.containers import FooterContainer, TextContainer
+from textual_vim_textarea.textarea_plus import Mode as VimMode
+from textual_vim_textarea.textarea_plus import VimTextAreaPlus
 
 from harlequin.autocomplete import (
     NO_SYMBOLS,
@@ -55,6 +59,21 @@ def _blank_history(template: EditHistory) -> EditHistory:
 
 
 class CodeEditor(TextEditor, inherit_bindings=False):
+    def compose(self) -> ComposeResult:
+        self.text_container = TextContainer()
+        self.text_input = VimTextAreaPlus(
+            language=self._language, text=self._initial_text, read_only=self.read_only
+        )
+        self.text_input.mode = VimMode.INSERT
+        self.completion_list = CompletionList()
+        self.footer = FooterContainer(classes="hide")
+        self.footer_label = Label("", id="textarea__save_open_input_label")
+        with self.text_container:
+            yield self.text_input
+            yield self.completion_list
+        with self.footer:
+            yield self.footer_label
+
     class Submitted(Message, bubble=True):
         """Posted when user runs the query.
 

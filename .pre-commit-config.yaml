@@ -10,17 +10,18 @@ repos:
     hooks:
       - id: mypy
         # this hook resolves its own environment, so every version here is one
-        # that can drift from pyproject.toml's. The three textual pins are the
-        # ones that matter: they are pinned exactly in pyproject.toml because
-        # their APIs move, and a stale copy here fails the hook on code that
-        # `uv run mypy` accepts. Keep all four in step with pyproject.toml.
+        # that can drift from pyproject.toml's. The four textual pins are pinned
+        # exactly in pyproject.toml because their APIs move, and a stale copy
+        # here fails the hook on code that `uv run mypy` accepts. Keep all four
+        # in step with pyproject.toml.
         additional_dependencies:
           - click
           - duckdb>=1.5.1
           - shandy-sqlfmt[jinjafmt]
           - "textual==8.2.8"
-          - "textual-fastdatatable==0.17.1"
-          - "textual-textarea==0.18.1"
+          - "textual-fastdatatable==0.19.1"
+          - "textual-textarea==0.18.2"
+          - "textual-vim-textarea==1.2.0"
           - pytest
           # reaches this environment transitively in the project's, through
           # pytest-textual-snapshot, so it has to be asked for by name here

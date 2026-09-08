@@ -6,6 +6,7 @@ from typing import Awaitable, Callable, cast
 import pytest
 from textual.message import Message
 from textual.worker import Worker, WorkerState
+from textual_vim_textarea.textarea_plus import VimTextAreaPlus
 
 from harlequin import Harlequin
 from harlequin.app import QueriesExecuted, QuerySubmitted, ResultsFetched
@@ -26,7 +27,7 @@ async def test_select_1(
         while app.editor is None:
             await pilot.pause()
         assert app.title == "Harlequin"
-        assert app.focused.__class__.__name__ == "TextAreaPlus"
+        assert isinstance(app.focused, VimTextAreaPlus)
 
         q = "select 1 as foo"
         for key in q:

@@ -26,6 +26,8 @@ dependencies = [
     "textual==8.2.8",
     "textual-fastdatatable==0.19.1",
     "textual-textarea==0.18.2",
+    # The package extra caps textual-textarea below Harlequin's current pin.
+    "textual-vim-textarea==1.2.0",
 
     # click
     "click==8.5.0",

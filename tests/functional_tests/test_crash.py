@@ -18,6 +18,7 @@ from textual.widgets.text_area import Selection
 from harlequin import Harlequin
 from harlequin.adapter import HarlequinAdapter
 from harlequin.app_base import _as_markup
+from harlequin.components.code_editor import EditorCollection
 from harlequin.crash import ISSUE_URL, crash_message
 from harlequin.editor_cache import BufferState, Cache, get_cache_file
 from harlequin.exception import HarlequinCrashError, pretty_error_message
@@ -231,9 +232,8 @@ async def test_a_crash_while_replaying_recovered_buffers_cannot_repeat(
     async def _boom(*_args: object, **_kwargs: object) -> None:
         raise RuntimeError("crash while replaying")
 
-    monkeypatch.setattr(
-        "harlequin.components.code_editor.EditorCollection.action_new_buffer", _boom
-    )
+    original_action_new_buffer = EditorCollection.action_new_buffer
+    monkeypatch.setattr(EditorCollection, "action_new_buffer", _boom)
     with pytest.raises(RuntimeError):
         async with app.run_test() as pilot:
             await pilot.pause()
@@ -242,7 +242,9 @@ async def test_a_crash_while_replaying_recovered_buffers_cannot_repeat(
     assert not poisoned.exists()
     assert poisoned.with_suffix(".replayed").exists()
 
-    monkeypatch.undo()
+    monkeypatch.setattr(
+        EditorCollection, "action_new_buffer", original_action_new_buffer
+    )
     async with app_all_adapters.run_test() as pilot:
         while app_all_adapters.editor is None:
             await pilot.pause()
@@ -253,7 +255,12 @@ async def test_a_crash_while_replaying_recovered_buffers_cannot_repeat(
 
 def render_panel(message: str) -> str:
     """The panel as a terminal receives it, escape sequences and all."""
-    console = Console(width=100, force_terminal=True, legacy_windows=False)
+    console = Console(
+        width=100,
+        force_terminal=True,
+        legacy_windows=False,
+        color_system="truecolor",
+    )
     with console.capture() as capture:
         console.print(
             pretty_error_message(

@@ -10,6 +10,7 @@ from textual.app import App
 from textual.widgets import TextArea
 from textual.widgets.text_area import Selection
 from textual.worker import WorkerFailed
+from textual_vim_textarea.textarea_plus import Mode, VimTextAreaPlus
 
 from harlequin import Harlequin
 from harlequin.autocomplete import BufferSymbols
@@ -177,6 +178,34 @@ async def test_buffers_keep_their_state(
         await pilot.pause()
         assert app.editor_collection.active == "tab-2"
         assert app.editor.text_input.scroll_offset == scrolled_to
+
+
+@pytest.mark.asyncio
+async def test_vim_modal_editing(
+    app_all_adapters: Harlequin,
+    wait_for_workers: Callable[[Harlequin], Awaitable[None]],
+) -> None:
+    async with app_all_adapters.run_test() as pilot:
+        app = app_all_adapters
+        await wait_for_workers(app)
+        while app.editor is None:
+            await pilot.pause()
+
+        assert app.editor.text_input is not None
+        assert isinstance(app.editor.text_input, VimTextAreaPlus)
+        assert app.editor.text_input.mode.value == Mode.INSERT.value
+
+        app.editor.text = "select 1\nselect 2"
+        app.editor.focus()
+        await pilot.press("escape")
+        await pilot.press("j", "d", "d")
+        await pilot.pause()
+        assert app.editor.text == "select 1"
+        assert app.editor.text_input.mode is Mode.NORMAL
+        await pilot.press("i", "x", "escape")
+        await pilot.pause()
+        assert app.editor.text == "xselect 1"
+        assert app.editor.text_input.mode is Mode.NORMAL
 
 
 @pytest.mark.flaky
