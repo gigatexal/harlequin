@@ -255,7 +255,12 @@ async def test_a_crash_while_replaying_recovered_buffers_cannot_repeat(
 
 def render_panel(message: str) -> str:
     """The panel as a terminal receives it, escape sequences and all."""
-    console = Console(width=100, force_terminal=True, legacy_windows=False)
+    console = Console(
+        width=100,
+        force_terminal=True,
+        legacy_windows=False,
+        color_system="truecolor",
+    )
     with console.capture() as capture:
         console.print(
             pretty_error_message(
