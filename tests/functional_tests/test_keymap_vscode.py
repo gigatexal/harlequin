@@ -112,7 +112,8 @@ async def test_editor_bindings(
 
         await pilot.press("a")
         assert app.editor.text == QUERY + "a"
-        await pilot.press("escape")  # dismiss autocomplete
+        await pilot.press("escape")  # dismiss autocomplete and enter normal mode
+        await pilot.press("a")  # append after the character under the cursor
         await pilot.press("enter")
         assert app.editor.text == QUERY + "a\n    "
 
